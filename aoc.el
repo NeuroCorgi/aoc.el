@@ -30,7 +30,7 @@
 
 (require 'url)
 
-(defgroup aoc.el nil "")
+(defgroup aoc.el nil "Convenience tool for Advent of Code")
 
 (defcustom aoc-cache-dir
   "~/.adventofcode/"
@@ -46,12 +46,12 @@
 
 (defcustom aoc-session-cookie
   nil
-  "Autharised session coockie"
+  "Authorised session cookie"
   :group 'aoc.el
   :type 'string)
 
 (defcustom aoc-run-alist
-  `(("\\.py\\'" . ("python3" "%f" "%i"))
+  `(("\\.py\\'" . ("pypy3" "%f" "%i"))
 	("\\.hs\\'" . ("runhaskell" "%f" "%i"))
 	("\\.el\\'" . ("emacs" "--script" "%f" "%i"))
 	("\\.bqn\\'" . ("BQN" "%f" "%i")))
@@ -272,6 +272,7 @@
 		part
 	  (error "Part must either 1 or 2: %d" part))))
 
+;;;###autoload
 (defun aoc-submit ()
   (interactive)
   (let* ((file-name (aoc--get-file-name))
@@ -280,6 +281,7 @@
 		 (part      (aoc--get-part file-name)))
 	 (aoc--submit file-name year day part)))
 
+;;;###autoload
 (defun aoc-test ()
   (interactive)
   (let* ((file-name (aoc--get-file-name))
@@ -288,6 +290,7 @@
 					 (aoc--run (expand-file-name test-name)
 							   (expand-file-name file-name))))))
 
+;;;###autoload
 (defun aoc-download ()
   (interactive)
   (let* ((year      (aoc--get-year))
