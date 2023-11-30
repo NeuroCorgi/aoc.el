@@ -50,6 +50,8 @@
   :group 'aoc.el
   :type 'string)
 
+;; TODO: add possibility for two step commands
+;;       when compilation is required
 (defcustom aoc-run-alist
   `(("\\.py\\'" . ("pypy3" "%f" "%i"))
 	("\\.hs\\'" . ("runhaskell" "%f" "%i"))
@@ -160,21 +162,24 @@
   (if (eq (car status) :error)
 	  (error "Failed to submit solution for part %d, day %d, %d"
 			 part day year)
-	(let ((reponse 
+	(let ((response 
 		   (with-current-buffer (current-buffer)
-			 (buffer-substring-no-properties (point) (point-max)))))
+			 (buffer-substring-no-properties (point-min) (point-max)))))
 	  (cond
 	   ((string-match-p aoc--right-answer-regexp response)
+		;; TODO: add answer caching
 		(message (format "That's the right answer %s for part %d, day %d, %d"
 						 answer part day year)))
 	   ((string-match-p aoc--incorrect-answer-regexp response)
+		;; TODO: Check for "too low"/"too high" and cache it
 		(message (format "That's not the right answer %s for part %d, day %d, %d"
 						 answer part day year)))
 	   ((string-match-p aoc--recent-answer-regexp response)
 		(message "You gave an answer too recently"))
 	   ((string-match-p aoc--wrong-level-regexp response)
 		(message "You don't seem to be solving the right level"))
-	   (t (message "Got an unknown response"))))))
+	   (t (message "Got an unknown response")
+		  (write-region (point-min) (point-max) "debug-output"))))))
 
 (defun aoc--submit (file-path year day part)
   (let ((input-file (aoc--input-file year day)))
@@ -187,9 +192,12 @@
 		   (url-request-method "POST")
 		   (url-request-extra-headers
 			`(("User-Agent" . ,aoc--user-agent-header)
+			  ("Content-Type" . "application/x-www-form-urlencoded")
 			  ("Cookie" . ,(aoc--session-cookie-string))))
 		   (url-request-data (format "level=%d&answer=%s"
 									 part answer)))
+	  (print url-request-extra-headers)
+	  (print url-request-data)
 	  (message (format "Submitted solution %s for part %d, day %d, %d"
 					   answer part day year))
 	  (url-retrieve url #'aoc--submit--callback
@@ -212,8 +220,7 @@
 (defun aoc--from-file (file-name default regexp)
   (if (null file-name)
 	  default
-	(let* ((case-fold-search nil)
-		   (last-match (aoc--string-last-match regexp file-name)))
+	(let* ((last-match (aoc--string-last-match regexp file-name)))
 	  (if last-match
 		  (progn
 			(string-match regexp last-match)
