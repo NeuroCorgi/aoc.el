@@ -6,6 +6,6 @@ Convenience functions to submit solutions for advent of code puzzles from emacs
 The package is not listed anywhere, so can be installed with `straight` or other manually.
 
 ```elisp
-(use-package
+(use-package aoc.el
   :straight (:host github :repo "NeuroCorgi/aoc.el"))
 ```
